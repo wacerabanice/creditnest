@@ -1,0 +1,72 @@
+/* Tailwind Core */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-teal-200 text-gray-800 antialiased;
+  margin: 5;
+  font-family: poppins, monospace, system-ui, -apple-system, BlinkMacSystemFont, 
+               "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+
+/* ---------------------------------- */
+/* Custom Scrollbar (Modern UI Look) */
+/* ---------------------------------- */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #35918c;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3d978b;
+}
+
+
+/* ---------------------------------- */
+/* Reusable Component Classes */
+/* ---------------------------------- */
+
+.card {
+  @apply bg-white p-6 rounded-2xl shadow transition hover:shadow-xl;
+}
+
+.input-field {
+  @apply border border-gray-300 p-3 w-full rounded-lg 
+         focus:outline-none focus:ring-2 focus:ring-blue-500;
+}
+
+.primary-button {
+  @apply bg-gradient-to-r from-blue-600 to-indigo-600 
+         text-white px-6 py-3 rounded-lg 
+         hover:scale-105 transition;
+}
+
+
+/* ---------------------------------- */
+/* Optional Fintech Polish */
+/* ---------------------------------- */
+
+h1, h2, h3, h4, h5 {
+  @apply font-semibold tracking-tight;
+}
+
+button {
+  cursor: pointer;
+}
+
