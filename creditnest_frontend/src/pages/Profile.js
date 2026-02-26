@@ -27,8 +27,8 @@ function Profile() {
     if (!isValidEmail(email)) return alert("Invalid email");
 
     try {
-      const res = await API.post("/signup", { name, email, password });
-      alert("Signup successful! Please login.");
+      const { data } = await API.post("/signup", { name, email, password });
+      alert(data.message || "Signup successful! Please login");
       setName(""); setEmail(""); setPassword("");
       navigate("/login"); // redirect to login
     } catch (err) {
