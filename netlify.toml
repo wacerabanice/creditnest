@@ -1,0 +1,4 @@
+[build]
+  base = "CreditNest_frontend"
+  command = "npm run build"
+  publish = "build"
