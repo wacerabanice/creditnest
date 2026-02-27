@@ -1,4 +1,4 @@
-  import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
@@ -15,6 +15,7 @@ function App() {
       <Routes>
 
         {/* Profile page - no sidebar */}
+        <Route path="/profile" element={<Profile />} />
         <Route path="/signup" element={<Profile />} />
         <Route path="/login" element={<Profile />} />
 
@@ -57,8 +58,7 @@ function App() {
             <ProtectedRoute>
               <Layout><Education /></Layout>
             </ProtectedRoute>
-          }
-        />
+          } />
 
       </Routes>
     </Router>
