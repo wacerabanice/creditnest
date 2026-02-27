@@ -28,11 +28,7 @@ function Profile() {
 
     try {
       const { data } = await API.post("/signup", { name, email, password });
-<<<<<<< HEAD
-      alert(data.message || "Signup successful!");
-=======
       alert(data.message || "Signup successful! Please login");
->>>>>>> ad4e5faba30d9d300964c936652cfc85273feaa9
       setName(""); setEmail(""); setPassword("");
       navigate("/login"); // redirect to login
     } catch (err) {
