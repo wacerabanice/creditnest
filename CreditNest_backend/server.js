@@ -11,7 +11,7 @@ const app = express();
 
 // ---------- MIDDLEWARE ----------
 app.use(cors({
-  origin: "https://everythingcredit.netlify.app"
+  origin: process.env.FRONTEND_URL || "https://everythingcredit.netlify.app"
 }));
 app.use(express.json());
 
@@ -205,7 +205,6 @@ app.post("/simulate", async (req, res) => {
 // ===============================
 // START SERVER
 // ===============================
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(` CreditNest server running on port ${PORT}`);
-});
+// Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`CreditNest server running on port ${PORT}`));
