@@ -12,14 +12,12 @@ function Simulator() {
 
   // Load last simulation on mount
   useEffect(() => {
-    let sims = [];
     try {
-      sims = JSON.parse(localStorage.getItem("simulatorResults")) || [];
+      const sims = JSON.parse(localStorage.getItem("simulatorResults")) || [];
+      if (sims.length > 0) setResult(sims[0]); // latest first
     } catch (e) {
       console.warn("LocalStorage corrupted:", e);
-      sims = [];
     }
-    if (sims.length > 0) setResult(sims[0]); // latest first
   }, []);
 
   const runSimulation = async () => {
@@ -49,7 +47,7 @@ function Simulator() {
 
       const data = response.data;
 
-      // Ensure gaps is always an array
+      // Normalize gaps to array
       let gaps = [];
       if (data.simulation.gaps) {
         gaps = Array.isArray(data.simulation.gaps)
@@ -69,21 +67,20 @@ function Simulator() {
         date: new Date(data.simulation.date).toLocaleString(),
       };
 
-      // Save simulation safely
-      let existing = [];
+      // Save simulation safely to localStorage
       try {
-        existing = JSON.parse(localStorage.getItem("simulatorResults")) || [];
+        let existing = JSON.parse(localStorage.getItem("simulatorResults")) || [];
         if (!Array.isArray(existing)) existing = [];
+        localStorage.setItem("simulatorResults", JSON.stringify([simulation, ...existing]));
       } catch (e) {
         console.warn("LocalStorage corrupted:", e);
-        existing = [];
+        localStorage.setItem("simulatorResults", JSON.stringify([simulation]));
       }
 
-      localStorage.setItem("simulatorResults", JSON.stringify([simulation, ...existing]));
       setResult(simulation);
-
       alert("Simulation saved! Redirecting to Dashboard...");
       navigate("/");
+
     } catch (err) {
       console.error("Simulation API error:", err.response?.data || err.message);
       alert(err.response?.data?.error || "Error running simulation");
@@ -100,24 +97,28 @@ function Simulator() {
           placeholder="Monthly Revenue"
           value={revenue}
           onChange={(e) => setRevenue(e.target.value)}
+          type="number"
         />
         <input
           className="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
           placeholder="Monthly Expenses"
           value={expenses}
           onChange={(e) => setExpenses(e.target.value)}
+          type="number"
         />
         <input
           className="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
           placeholder="Existing Loans"
           value={loans}
           onChange={(e) => setLoans(e.target.value)}
+          type="number"
         />
         <input
           className="border border-gray-300 p-3 w-full mb-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
           placeholder="Credit Score"
           value={creditScore}
           onChange={(e) => setCreditScore(e.target.value)}
+          type="number"
         />
 
         <button
@@ -131,16 +132,9 @@ function Simulator() {
       {result && (
         <div className="max-w-xl space-y-4 mx-auto bg-teal-300 p-10 rounded-2xl shadow-lg">
           <h3 className="text-lg font-semibold">Latest Simulation</h3>
-          <p>
-            <strong>Date:</strong> {result.date}
-          </p>
-          <p>
-            <strong>Readiness Score:</strong> {result.readiness_score}%
-          </p>
-          <p>
-            <strong>Gaps:</strong>{" "}
-            {result.gaps.length > 0 ? result.gaps.join(", ") : "None"}
-          </p>
+          <p><strong>Date:</strong> {result.date}</p>
+          <p><strong>Readiness Score:</strong> {result.readiness_score}%</p>
+          <p><strong>Gaps:</strong> {result.gaps.length > 0 ? result.gaps.join(", ") : "None"}</p>
         </div>
       )}
     </div>

@@ -28,17 +28,18 @@ function Profile() {
     console.log("Signup clicked", { name, email, password });
 
     try {
-      const { data } = await API.post("/signup", { name, email, password });
-      console.log("Signup response:", data);
+  const { data } = await API.post("/login", {
+    email: email.trim().toLowerCase(),
+    password: password.trim()
+  });
 
-      alert(data.message || "Signup successful! Please login");
-      setName(""); setEmail(""); setPassword("");
-      navigate("/login");
-    } catch (err) {
-      console.error("Signup API error:", err.response?.data || err.message);
-      alert(err.response?.data?.error || "Error creating account");
-    }
-  };
+  console.log("Login response:", data);
+  alert(`Welcome back, ${data.name}!`);
+} catch (err) {
+  console.error("Login API error:", err.response?.data || err.message);
+  alert(err.response?.data?.error || "Login failed");
+}
+  }
 
   // ----------------- LOGIN -----------------
   const handleLogin = async (e) => {
@@ -49,19 +50,18 @@ function Profile() {
     console.log("Login clicked", { email, password });
 
     try {
-      const { data } = await API.post("/login", { email, password });
-      console.log("Login response:", data);
+  const { data } = await API.post("/login", {
+    email: email.trim().toLowerCase(),
+    password: password.trim()
+  });
 
-      localStorage.setItem("user_id", data.id);
-      localStorage.setItem("user", JSON.stringify({ name: data.name, email: data.email }));
-
-      alert(`Welcome back, ${data.name}!`);
-      navigate("/");
-    } catch (err) {
-      console.error("Login API error:", err.response?.data || err.message);
-      alert(err.response?.data?.error || "Login failed");
-    }
-  };
+  console.log("Login response:", data);
+  alert(`Welcome back, ${data.name}!`);
+} catch (err) {
+  console.error("Login API error:", err.response?.data || err.message);
+  alert(err.response?.data?.error || "Login failed");
+}
+  }
 
   return (
     <div className="max-w-xl mx-auto p-8 bg-teal-200 rounded-2xl shadow-lg space-y-6 mt-10">
@@ -134,5 +134,6 @@ function Profile() {
     </div>
   );
 }
+  
 
 export default Profile;

@@ -6,22 +6,18 @@ const pool = require("./db");
 
 const app = express();
 
-// ---------------- Middleware ----------------
 app.use(cors({
   origin: ["https://everythingcredit.netlify.app", "http://localhost:3000"]
 }));
 app.use(express.json());
 
 // ---------------- Health Check ----------------
-app.get("/", (req, res) => {
-  res.send("CreditNest API is running...");
-});
+app.get("/", (req, res) => res.send("CreditNest API is running..."));
 
 // ---------------- Signup ----------------
 app.post("/signup", async (req, res) => {
   try {
     let { name, email, password } = req.body;
-
     name = name?.trim();
     email = email?.trim().toLowerCase();
     password = password?.trim();
@@ -29,18 +25,16 @@ app.post("/signup", async (req, res) => {
     if (!name || !email || !password)
       return res.status(400).json({ error: "All fields are required" });
 
-    // Check if email already exists
     const checkUser = await pool.query(
       "SELECT * FROM users WHERE LOWER(email) = $1",
       [email]
     );
+
     if (checkUser.rows.length > 0)
       return res.status(400).json({ error: "Email already exists" });
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert new user
     const newUser = await pool.query(
       `INSERT INTO users (name, email, password)
        VALUES ($1, $2, $3)
@@ -48,11 +42,7 @@ app.post("/signup", async (req, res) => {
       [name, email, hashedPassword]
     );
 
-    res.status(201).json({
-      message: "Signup successful",
-      user: newUser.rows[0]
-    });
-
+    res.status(201).json({ message: "Signup successful", user: newUser.rows[0] });
   } catch (err) {
     console.error("Signup Error:", err);
     res.status(500).json({ error: "Error creating account" });
@@ -63,7 +53,6 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     let { email, password } = req.body;
-
     email = email?.trim().toLowerCase();
     password = password?.trim();
 
@@ -80,23 +69,17 @@ app.post("/login", async (req, res) => {
 
     const user = result.rows[0];
     const validPassword = await bcrypt.compare(password, user.password);
-
     if (!validPassword)
       return res.status(400).json({ error: "Invalid credentials" });
 
-    res.json({
-      id: user.id,
-      name: user.name,
-      email: user.email
-    });
-
+    res.json({ id: user.id, name: user.name, email: user.email });
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).json({ error: "Login failed" });
   }
 });
 
-// ---------------- Get User by ID ----------------
+// ---------------- Get User ----------------
 app.get("/users/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -122,7 +105,6 @@ app.post("/simulate", async (req, res) => {
   try {
     let { user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score } = req.body;
 
-    // Convert to numbers
     user_id = Number(user_id);
     monthly_revenue = Number(monthly_revenue);
     monthly_expenses = Number(monthly_expenses);
@@ -134,12 +116,9 @@ app.post("/simulate", async (req, res) => {
       isNaN(existing_loans) || isNaN(credit_score)
     ) return res.status(400).json({ error: "All fields must be valid numbers" });
 
-    // Check user exists
     const userCheck = await pool.query("SELECT id FROM users WHERE id = $1", [user_id]);
-    if (userCheck.rows.length === 0)
-      return res.status(400).json({ error: "User does not exist" });
+    if (userCheck.rows.length === 0) return res.status(400).json({ error: "User does not exist" });
 
-    // Calculate readiness
     let readiness_score = 0;
     const gaps = [];
     const savings = monthly_revenue - monthly_expenses;
@@ -155,7 +134,6 @@ app.post("/simulate", async (req, res) => {
     else if (credit_score >= 650) { readiness_score += 20; gaps.push("Moderate credit score"); }
     else { readiness_score += 10; gaps.push("Low credit score"); }
 
-    // Insert simulation
     const insertQuery = `
       INSERT INTO simulations
       (user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score, readiness_score, gaps, created_at)
@@ -175,7 +153,6 @@ app.post("/simulate", async (req, res) => {
         date: simulation.created_at
       }
     });
-
   } catch (err) {
     console.error("Simulation Error:", err);
     res.status(500).json({ error: "Error running simulation" });
