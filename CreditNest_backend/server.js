@@ -2,19 +2,20 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
-const pool = require("./db");
+const pool = require("./db"); 
 
 const app = express();
 
+// ---------------- MIDDLEWARE ----------------
 app.use(cors({
-  origin: ["https://everythingcredit.netlify.app", "http://localhost:3000"]
+  origin: ["http://localhost:3000", "https://everythingcredit.netlify.app"]
 }));
 app.use(express.json());
 
-// ---------------- Health Check ----------------
-app.get("/", (req, res) => res.send("CreditNest API is running..."));
+// ---------------- HEALTH CHECK ----------------
+app.get("/", (req, res) => res.send("CreditNest API running..."));
 
-// ---------------- Signup ----------------
+// ---------------- SIGNUP ----------------
 app.post("/signup", async (req, res) => {
   try {
     let { name, email, password } = req.body;
@@ -23,33 +24,41 @@ app.post("/signup", async (req, res) => {
     password = password?.trim();
 
     if (!name || !email || !password)
-      return res.status(400).json({ error: "All fields are required" });
+      return res.status(400).json({ error: "All fields required" });
 
+    // Check existing email
     const checkUser = await pool.query(
-      "SELECT * FROM users WHERE LOWER(email) = $1",
+      "SELECT id FROM users WHERE LOWER(email) = $1",
       [email]
     );
-
     if (checkUser.rows.length > 0)
       return res.status(400).json({ error: "Email already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = await pool.query(
-      `INSERT INTO users (name, email, password)
-       VALUES ($1, $2, $3)
-       RETURNING id, name, email`,
+      "INSERT INTO users (name, email, password) VALUES ($1,$2,$3) RETURNING id,name,email",
       [name, email, hashedPassword]
     );
 
     res.status(201).json({ message: "Signup successful", user: newUser.rows[0] });
   } catch (err) {
-    console.error("Signup Error:", err);
+    console.error("Signup Error:", err.message);
     res.status(500).json({ error: "Error creating account" });
   }
 });
 
-// ---------------- Login ----------------
+// GET Signup users
+app.get("/signup", async (req, res) => {
+  try {
+    const users = await pool.query("SELECT id,name,email FROM users ORDER BY id DESC");
+    res.json(users.rows);
+  } catch (err) {
+    console.error("GET Signup Error:", err.message);
+    res.status(500).json({ error: "Error fetching users" });
+  }
+});
+
+// ---------------- LOGIN ----------------
 app.post("/login", async (req, res) => {
   try {
     let { email, password } = req.body;
@@ -57,66 +66,43 @@ app.post("/login", async (req, res) => {
     password = password?.trim();
 
     if (!email || !password)
-      return res.status(400).json({ error: "Email and password are required" });
+      return res.status(400).json({ error: "Email and password required" });
 
-    const result = await pool.query(
-      "SELECT * FROM users WHERE LOWER(email) = $1",
-      [email]
-    );
-
-    if (result.rows.length === 0)
-      return res.status(400).json({ error: "Invalid credentials" });
+    const result = await pool.query("SELECT * FROM users WHERE LOWER(email) = $1", [email]);
+    if (result.rows.length === 0) return res.status(400).json({ error: "Invalid credentials" });
 
     const user = result.rows[0];
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword)
-      return res.status(400).json({ error: "Invalid credentials" });
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(400).json({ error: "Invalid credentials" });
 
     res.json({ id: user.id, name: user.name, email: user.email });
   } catch (err) {
-    console.error("Login Error:", err);
+    console.error("Login Error:", err.message);
     res.status(500).json({ error: "Login failed" });
   }
 });
 
-// ---------------- Get User ----------------
-app.get("/users/:id", async (req, res) => {
+// GET login users
+app.get("/login", async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: "Invalid user ID" });
-
-    const result = await pool.query(
-      "SELECT id, name, email FROM users WHERE id = $1",
-      [id]
-    );
-
-    if (result.rows.length === 0)
-      return res.status(404).json({ error: "User not found" });
-
-    res.json(result.rows[0]);
+    const users = await pool.query("SELECT id,name,email FROM users ORDER BY id DESC");
+    res.json(users.rows);
   } catch (err) {
-    console.error("Get User Error:", err);
-    res.status(500).json({ error: "Error fetching user" });
+    console.error("GET Login Error:", err.message);
+    res.status(500).json({ error: "Error fetching users" });
   }
 });
 
-// ---------------- Simulation ----------------
+// ---------------- SIMULATOR ----------------
 app.post("/simulate", async (req, res) => {
   try {
-    let { user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score } = req.body;
+    const { user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score } = req.body;
 
-    user_id = Number(user_id);
-    monthly_revenue = Number(monthly_revenue);
-    monthly_expenses = Number(monthly_expenses);
-    existing_loans = Number(existing_loans);
-    credit_score = Number(credit_score);
+    if (!user_id || isNaN(monthly_revenue) || isNaN(monthly_expenses) || isNaN(existing_loans) || isNaN(credit_score))
+      return res.status(400).json({ error: "All fields must be valid numbers" });
 
-    if (
-      !user_id || isNaN(monthly_revenue) || isNaN(monthly_expenses) ||
-      isNaN(existing_loans) || isNaN(credit_score)
-    ) return res.status(400).json({ error: "All fields must be valid numbers" });
-
-    const userCheck = await pool.query("SELECT id FROM users WHERE id = $1", [user_id]);
+    // check user exists
+    const userCheck = await pool.query("SELECT id FROM users WHERE id=$1", [user_id]);
     if (userCheck.rows.length === 0) return res.status(400).json({ error: "User does not exist" });
 
     let readiness_score = 0;
@@ -134,31 +120,37 @@ app.post("/simulate", async (req, res) => {
     else if (credit_score >= 650) { readiness_score += 20; gaps.push("Moderate credit score"); }
     else { readiness_score += 10; gaps.push("Low credit score"); }
 
-    const insertQuery = `
-      INSERT INTO simulations
+    const insert = await pool.query(
+      `INSERT INTO simulations
       (user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score, readiness_score, gaps, created_at)
       VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())
-      RETURNING *
-    `;
-    const values = [user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score, readiness_score, gaps.join("; ")];
-    const result = await pool.query(insertQuery, values);
-    const simulation = result.rows[0];
+      RETURNING *`,
+      [user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score, readiness_score, gaps.join("; ")]
+    );
 
     res.json({
       readiness_score,
       gaps,
-      simulation: {
-        ...simulation,
-        gaps,
-        date: simulation.created_at
-      }
+      simulation: insert.rows[0]
     });
+
   } catch (err) {
-    console.error("Simulation Error:", err);
+    console.error("Simulation Error:", err.message);
     res.status(500).json({ error: "Error running simulation" });
   }
 });
 
-// ---------------- Start Server ----------------
+// GET all simulations
+app.get("/simulate", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM simulations ORDER BY created_at DESC");
+    res.json(result.rows);
+  } catch (err) {
+    console.error("GET Simulate Error:", err.message);
+    res.status(500).json({ error: "Error fetching simulations" });
+  }
+});
+
+// ---------------- START SERVER ----------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`CreditNest server running on port ${PORT}`));

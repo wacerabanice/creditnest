@@ -6,7 +6,7 @@ function Profile() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState("signup"); // auto detect page
+  const [mode, setMode] = useState("signup"); 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,18 +28,21 @@ function Profile() {
     console.log("Signup clicked", { name, email, password });
 
     try {
-  const { data } = await API.post("/login", {
-    email: email.trim().toLowerCase(),
-    password: password.trim()
-  });
+      const { data } = await API.post("/signup", {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
+      });
 
-  console.log("Login response:", data);
-  alert(`Welcome back, ${data.name}!`);
-} catch (err) {
-  console.error("Login API error:", err.response?.data || err.message);
-  alert(err.response?.data?.error || "Login failed");
-}
-  }
+      console.log("Signup response:", data);
+      alert(`Welcome ${data.user.name}! Your account has been created.`);
+      // Redirect to login after signup
+      navigate("/login");
+    } catch (err) {
+      console.error("Signup API error:", err.response?.data || err.message);
+      alert(err.response?.data?.error || "Signup failed");
+    }
+  };
 
   // ----------------- LOGIN -----------------
   const handleLogin = async (e) => {
@@ -50,18 +53,21 @@ function Profile() {
     console.log("Login clicked", { email, password });
 
     try {
-  const { data } = await API.post("/login", {
-    email: email.trim().toLowerCase(),
-    password: password.trim()
-  });
+      const { data } = await API.post("/login", {
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
+      });
 
-  console.log("Login response:", data);
-  alert(`Welcome back, ${data.name}!`);
-} catch (err) {
-  console.error("Login API error:", err.response?.data || err.message);
-  alert(err.response?.data?.error || "Login failed");
-}
-  }
+      console.log("Login response:", data);
+      alert(`Welcome back, ${data.name}!`);
+      localStorage.setItem("user_id", data.id); // store user id
+      // Redirect to dashboard/home after login
+      navigate("/");
+    } catch (err) {
+      console.error("Login API error:", err.response?.data || err.message);
+      alert(err.response?.data?.error || "Login failed");
+    }
+  };
 
   return (
     <div className="max-w-xl mx-auto p-8 bg-teal-200 rounded-2xl shadow-lg space-y-6 mt-10">
@@ -134,6 +140,5 @@ function Profile() {
     </div>
   );
 }
-  
 
 export default Profile;
