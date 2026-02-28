@@ -11,7 +11,7 @@ const app = express();
 
 // ---------- MIDDLEWARE ----------
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "https://everythingcredit.netlify.app"
+  origin: ["https://everythingcredit.netlify.app", "http://localhost:3000"]
 }));
 app.use(express.json());
 
