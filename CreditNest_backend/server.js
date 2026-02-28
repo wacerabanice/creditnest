@@ -33,7 +33,7 @@ app.post("/signup", async (req, res) => {
     email = email?.trim().toLowerCase();
     password = password?.trim();
 
-    if (!name || !email || !password) {
+    if (name == null || email == null || password == null) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
