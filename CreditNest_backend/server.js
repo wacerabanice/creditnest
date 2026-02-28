@@ -10,7 +10,9 @@ const pool = require("./db");
 const app = express();
 
 // ---------- MIDDLEWARE ----------
-app.use(cors());
+app.use(cors({
+  origin: "https://everythingcredit.netlify.app"
+}));
 app.use(express.json());
 
 // ===============================

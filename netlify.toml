@@ -1,4 +1,20 @@
+# netlify.toml - CreditNest Frontend
 [build]
+  # The folder containing your frontend (React app)
   base = "creditnest_frontend"
+  
+  # Where the production build output lives
   publish = "build"
+  
+  # The build command from package.json
   command = "npm run build"
+
+# Optional: Environment variables for Netlify (you can also set them in UI)
+[build.environment]
+  REACT_APP_API_URL = "https://<YOUR_RENDER_BACKEND_URL>"  # <-- replace with your Render backend URL
+
+# Redirect all unmatched routes to index.html (important for React Router)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
