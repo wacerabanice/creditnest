@@ -17,7 +17,18 @@ function Profile() {
     else setMode("signup");
   }, [location.pathname]);
 
-  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidEmail = (email) => {
+  if (!email) return false;
+  email = email.trim().toLowerCase();
+
+  // Regex explanation:
+  // ^[\w.%+-]+      => start with word chars, %, +, -, . allowed
+  // @               => must have a single @
+  // [A-Za-z0-9.-]+  => domain name (letters, numbers, dots, hyphens)
+  // \.[A-Za-z]{2,}$ => top-level domain like .com, .net, .org
+  const emailRegex = /^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+  return emailRegex.test(email);
+};
 
   // ----------------- SIGNUP -----------------
   const handleSignup = async (e) => {
