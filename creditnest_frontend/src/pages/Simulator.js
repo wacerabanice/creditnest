@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import API from "../services/api"; 
+import API from "../services/api";
 
 function Simulator() {
   const [revenue, setRevenue] = useState("");
@@ -10,12 +10,14 @@ function Simulator() {
 
   const user_id = Number(localStorage.getItem("user_id"));
 
-  // Load last simulation for this user
+  // Load last simulation for the logged-in user
   useEffect(() => {
     if (!user_id) return;
+
     try {
-      const sims = JSON.parse(localStorage.getItem("simulatorResults")) || [];
-      if (sims.length > 0) setResult(sims[0]);
+      const allSims = JSON.parse(localStorage.getItem("simulatorResults")) || {};
+      const userSims = allSims[user_id] || [];
+      if (userSims.length > 0) setResult(userSims[0]); // latest first
     } catch (e) {
       console.warn("LocalStorage corrupted:", e);
     }
@@ -43,13 +45,17 @@ function Simulator() {
           : String(data.simulation.gaps).split(";").map(g => g.trim())
         : [];
 
-      const simulation = { ...data.simulation, gaps, date: new Date(data.simulation.created_at).toLocaleString() };
+      const simulation = {
+        ...data.simulation,
+        gaps,
+        date: new Date(data.simulation.created_at).toLocaleString(),
+      };
 
-      // Save only this user's simulations
-      let existing = JSON.parse(localStorage.getItem("simulatorResults")) || [];
-      if (!Array.isArray(existing)) existing = [];
-      existing = [simulation, ...existing.filter(s => s.user_id === user_id)];
-      localStorage.setItem("simulatorResults", JSON.stringify(existing));
+      // Save simulations per user
+      let allSims = JSON.parse(localStorage.getItem("simulatorResults")) || {};
+      allSims[user_id] = allSims[user_id] || [];
+      allSims[user_id].unshift(simulation); // latest first
+      localStorage.setItem("simulatorResults", JSON.stringify(allSims));
 
       setResult(simulation);
       alert("Simulation saved!");
@@ -64,12 +70,41 @@ function Simulator() {
       <div className="max-w-xl mx-auto bg-teal-300 p-10 rounded-2xl shadow-lg">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Loan Readiness Simulator</h2>
 
-        <input type="number" placeholder="Monthly Revenue" value={revenue} onChange={e => setRevenue(e.target.value)} className="border p-3 w-full mb-4 rounded-lg" />
-        <input type="number" placeholder="Monthly Expenses" value={expenses} onChange={e => setExpenses(e.target.value)} className="border p-3 w-full mb-4 rounded-lg" />
-        <input type="number" placeholder="Existing Loans" value={loans} onChange={e => setLoans(e.target.value)} className="border p-3 w-full mb-4 rounded-lg" />
-        <input type="number" placeholder="Credit Score" value={creditScore} onChange={e => setCreditScore(e.target.value)} className="border p-3 w-full mb-6 rounded-lg" />
+        <input
+          type="number"
+          placeholder="Monthly Revenue"
+          value={revenue}
+          onChange={e => setRevenue(e.target.value)}
+          className="border p-3 w-full mb-4 rounded-lg"
+        />
+        <input
+          type="number"
+          placeholder="Monthly Expenses"
+          value={expenses}
+          onChange={e => setExpenses(e.target.value)}
+          className="border p-3 w-full mb-4 rounded-lg"
+        />
+        <input
+          type="number"
+          placeholder="Existing Loans"
+          value={loans}
+          onChange={e => setLoans(e.target.value)}
+          className="border p-3 w-full mb-4 rounded-lg"
+        />
+        <input
+          type="number"
+          placeholder="Credit Score"
+          value={creditScore}
+          onChange={e => setCreditScore(e.target.value)}
+          className="border p-3 w-full mb-6 rounded-lg"
+        />
 
-        <button onClick={runSimulation} className="bg-teal-600 text-white w-full py-3 rounded-lg">Run Simulation</button>
+        <button
+          onClick={runSimulation}
+          className="bg-teal-600 text-white w-full py-3 rounded-lg hover:bg-teal-500 transition"
+        >
+          Run Simulation
+        </button>
       </div>
 
       {result && (
