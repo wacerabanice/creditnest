@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import API from "../services/api"; 
 
 function Simulator() {
@@ -8,7 +7,6 @@ function Simulator() {
   const [loans, setLoans] = useState("");
   const [creditScore, setCreditScore] = useState("");
   const [result, setResult] = useState(null);
-  const navigate = useNavigate();
 
   const user_id = Number(localStorage.getItem("user_id"));
 
