@@ -1,33 +1,39 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 function Reports() {
-  const [reports, setReports] = useState([]);
+  const [simulations, setSimulations] = useState([]);
 
   useEffect(() => {
-    const savedReports = JSON.parse(localStorage.getItem("simulatorResults")) || [];
-    setReports(savedReports);
+    const user_id = Number(localStorage.getItem("user_id"));
+
+    const allSims = JSON.parse(localStorage.getItem("simulatorResults")) || {};
+    const userSims = allSims[user_id] || [];
+
+    setSimulations(userSims);
   }, []);
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Reports</h1>
+    <div className="max-w-3xl mx-auto p-6">
+      <h2 className="text-2xl font-bold mb-6">Simulation Reports</h2>
 
-      {reports.length === 0 ? (
-        <p className="text-gray-600">No reports found. Run a simulation first!</p>
+      {simulations.length === 0 ? (
+        <p>No simulations yet.</p>
       ) : (
-        <div className="space-y-4">
-          {reports.map((report, index) => (
-            <div key={index} className="bg-white p-6 rounded-2xl shadow-md">
-              <p><strong>Date:</strong> {report.date || "N/A"}</p>
-              <p><strong>Readiness Score:</strong> {report.readiness_score ?? 0}%</p>
-              <p><strong>Monthly Revenue:</strong> {report.monthly_revenue}</p>
-              <p><strong>Monthly Expenses:</strong> {report.monthly_expenses}</p>
-              <p><strong>Existing Loans:</strong> {report.existing_loans}</p>
-              <p><strong>Credit Score:</strong> {report.credit_score}</p>
-              <p><strong>Loan Gaps:</strong> {report.gaps?.join(", ") || "None"}</p>
-            </div>
-          ))}
-        </div>
+        simulations.map((sim, index) => (
+          <div key={index} className="bg-white p-4 mb-4 shadow rounded-lg">
+            <p><strong>Date:</strong> {sim.date}</p>
+            <p><strong>Readiness Score:</strong> {sim.readiness_score}%</p>
+            <p><strong>Revenue:</strong> {sim.monthly_revenue}</p>
+            <p><strong>Expenses:</strong> {sim.monthly_expenses}</p>
+            <p><strong>Loans:</strong> {sim.existing_loans}</p>
+            <p><strong>Credit Score:</strong> {sim.credit_score}</p>
+
+            <p>
+              <strong>Gaps:</strong>{" "}
+              {sim.gaps.length ? sim.gaps.join(", ") : "None"}
+            </p>
+          </div>
+        ))
       )}
     </div>
   );
