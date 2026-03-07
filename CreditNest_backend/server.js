@@ -140,13 +140,23 @@ app.post("/simulate", async (req, res) => {
   }
 });
 
-// GET all simulations
-app.get("/simulate", async (req, res) => {
+// GET simulations for a specific user
+app.get("/simulate/:user_id", async (req, res) => {
+  const { user_id } = req.params;
+
   try {
-    const result = await pool.query("SELECT * FROM simulations ORDER BY created_at DESC");
-    res.json(result.rows);
+    const userCheck = await pool.query("SELECT id FROM users WHERE id=$1", [user_id]);
+    if (userCheck.rows.length === 0)
+      return res.status(400).json({ error: "User does not exist" });
+
+    const result = await pool.query(
+      "SELECT * FROM simulations WHERE user_id=$1 ORDER BY created_at DESC",
+      [user_id]
+    );
+
+    res.json({ simulations: result.rows });
   } catch (err) {
-    console.error("GET Simulate Error:", err.message);
+    console.error("GET Simulations Error:", err.message);
     res.status(500).json({ error: "Error fetching simulations" });
   }
 });
