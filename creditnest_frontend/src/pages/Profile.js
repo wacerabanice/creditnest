@@ -36,8 +36,8 @@ function Profile() {
         password: password.trim(),
       });
 
-      alert(`Welcome ${data.user.name}! Your account has been created.`);
-      navigate("/login"); // redirect to login after signup
+      alert(`Welcome ${data.user.name}! Account created.`);
+      navigate("/login");
     } catch (err) {
       console.error("Signup API error:", err.response?.data || err.message);
       alert(err.response?.data?.error || "Signup failed");
@@ -56,15 +56,12 @@ function Profile() {
         password: password.trim(),
       });
 
-      alert(`Welcome back, ${data.name}!`);
-      
-      // Store current user_id
+      // Clear previous user's simulations
       localStorage.setItem("user_id", data.id);
+      localStorage.setItem("simulatorResults", JSON.stringify([]));
 
-      // Optional: reset the result state in Simulator by removing previous simulations for this user
-      // We don't delete all simulations; we just filter them in Simulator
-
-      navigate("/"); // redirect to dashboard
+      alert(`Welcome back, ${data.name}!`);
+      navigate("/");
     } catch (err) {
       console.error("Login API error:", err.response?.data || err.message);
       alert(err.response?.data?.error || "Login failed");
@@ -77,34 +74,64 @@ function Profile() {
         <button
           className={`px-4 py-2 rounded-xl ${mode === "signup" ? "bg-teal-600 text-white" : "bg-teal-100"}`}
           onClick={() => navigate("/signup")}
-        >Sign Up</button>
+        >
+          Sign Up
+        </button>
         <button
           className={`px-4 py-2 rounded-xl ${mode === "login" ? "bg-teal-600 text-white" : "bg-teal-100"}`}
           onClick={() => navigate("/login")}
-        >Login</button>
+        >
+          Login
+        </button>
       </div>
 
       {mode === "signup" ? (
         <div className="space-y-4">
-          <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)}
-            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg" />
-          <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg" />
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-white p-4 placeholder-green-900 rounded-2xl shadow-lg" />
-          <button onClick={handleSignup}
-            className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold p-3 rounded-xl transition">
+          <input
+            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <input
+            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            className="w-full bg-white p-4 placeholder-green-900 rounded-2xl shadow-lg"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold p-3 rounded-xl transition"
+            onClick={handleSignup}
+          >
             Create Profile
           </button>
         </div>
       ) : (
         <div className="space-y-4">
-          <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg" />
-          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg" />
-          <button onClick={handleLogin}
-            className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold p-3 rounded-xl transition">
+          <input
+            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold p-3 rounded-xl transition"
+            onClick={handleLogin}
+          >
             Login
           </button>
         </div>

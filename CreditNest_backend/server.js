@@ -2,41 +2,32 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
-const pool = require("./db"); 
+const pool = require("./db");
 
 const app = express();
 
-// ---------------- MIDDLEWARE ----------------
-app.use(cors({
-  origin: ["http://localhost:3000", "https://everythingcredit.netlify.app"]
-}));
+app.use(cors({ origin: ["http://localhost:3000", "https://everythingcredit.netlify.app"] }));
 app.use(express.json());
 
-// ---------------- HEALTH CHECK ----------------
+// -------- HEALTH CHECK --------
 app.get("/", (req, res) => res.send("CreditNest API running..."));
 
-// ---------------- SIGNUP ----------------
+// -------- SIGNUP --------
 app.post("/signup", async (req, res) => {
   try {
     let { name, email, password } = req.body;
-    name = name?.trim();
-    email = email?.trim().toLowerCase();
-    password = password?.trim();
+    if (!name || !email || !password) return res.status(400).json({ error: "All fields required" });
 
-    if (!name || !email || !password)
-      return res.status(400).json({ error: "All fields required" });
+    email = email.trim().toLowerCase();
+    name = name.trim();
+    password = password.trim();
 
-    // Check existing email
-    const checkUser = await pool.query(
-      "SELECT id FROM users WHERE LOWER(email) = $1",
-      [email]
-    );
-    if (checkUser.rows.length > 0)
-      return res.status(400).json({ error: "Email already exists" });
+    const checkUser = await pool.query("SELECT id FROM users WHERE LOWER(email)=$1", [email]);
+    if (checkUser.rows.length) return res.status(400).json({ error: "Email already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await pool.query(
-      "INSERT INTO users (name, email, password) VALUES ($1,$2,$3) RETURNING id,name,email",
+      "INSERT INTO users (name,email,password) VALUES ($1,$2,$3) RETURNING id,name,email",
       [name, email, hashedPassword]
     );
 
@@ -47,29 +38,17 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-// GET Signup users
-app.get("/signup", async (req, res) => {
-  try {
-    const users = await pool.query("SELECT id,name,email FROM users ORDER BY id DESC");
-    res.json(users.rows);
-  } catch (err) {
-    console.error("GET Signup Error:", err.message);
-    res.status(500).json({ error: "Error fetching users" });
-  }
-});
-
-// ---------------- LOGIN ----------------
+// -------- LOGIN --------
 app.post("/login", async (req, res) => {
   try {
     let { email, password } = req.body;
-    email = email?.trim().toLowerCase();
-    password = password?.trim();
+    if (!email || !password) return res.status(400).json({ error: "Email and password required" });
 
-    if (!email || !password)
-      return res.status(400).json({ error: "Email and password required" });
+    email = email.trim().toLowerCase();
+    password = password.trim();
 
-    const result = await pool.query("SELECT * FROM users WHERE LOWER(email) = $1", [email]);
-    if (result.rows.length === 0) return res.status(400).json({ error: "Invalid credentials" });
+    const result = await pool.query("SELECT * FROM users WHERE LOWER(email)=$1", [email]);
+    if (!result.rows.length) return res.status(400).json({ error: "Invalid credentials" });
 
     const user = result.rows[0];
     const valid = await bcrypt.compare(password, user.password);
@@ -82,18 +61,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// GET login users
-app.get("/login", async (req, res) => {
-  try {
-    const users = await pool.query("SELECT id,name,email FROM users ORDER BY id DESC");
-    res.json(users.rows);
-  } catch (err) {
-    console.error("GET Login Error:", err.message);
-    res.status(500).json({ error: "Error fetching users" });
-  }
-});
-
-// ---------------- SIMULATOR ----------------
+// -------- SIMULATOR --------
 app.post("/simulate", async (req, res) => {
   try {
     const { user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score } = req.body;
@@ -101,9 +69,8 @@ app.post("/simulate", async (req, res) => {
     if (!user_id || isNaN(monthly_revenue) || isNaN(monthly_expenses) || isNaN(existing_loans) || isNaN(credit_score))
       return res.status(400).json({ error: "All fields must be valid numbers" });
 
-    // check user exists
     const userCheck = await pool.query("SELECT id FROM users WHERE id=$1", [user_id]);
-    if (userCheck.rows.length === 0) return res.status(400).json({ error: "User does not exist" });
+    if (!userCheck.rows.length) return res.status(400).json({ error: "User does not exist" });
 
     let readiness_score = 0;
     const gaps = [];
@@ -121,46 +88,17 @@ app.post("/simulate", async (req, res) => {
     else { readiness_score += 10; gaps.push("Low credit score"); }
 
     const insert = await pool.query(
-      `INSERT INTO simulations
-      (user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score, readiness_score, gaps, created_at)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())
-      RETURNING *`,
+      `INSERT INTO simulations (user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score, readiness_score, gaps, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,NOW()) RETURNING *`,
       [user_id, monthly_revenue, monthly_expenses, existing_loans, credit_score, readiness_score, gaps.join("; ")]
     );
 
-    res.json({
-      readiness_score,
-      gaps,
-      simulation: insert.rows[0]
-    });
-
+    res.json({ readiness_score, gaps, simulation: insert.rows[0] });
   } catch (err) {
     console.error("Simulation Error:", err.message);
     res.status(500).json({ error: "Error running simulation" });
   }
 });
 
-// GET simulations for a specific user
-app.get("/simulate/:user_id", async (req, res) => {
-  const { user_id } = req.params;
-
-  try {
-    const userCheck = await pool.query("SELECT id FROM users WHERE id=$1", [user_id]);
-    if (userCheck.rows.length === 0)
-      return res.status(400).json({ error: "User does not exist" });
-
-    const result = await pool.query(
-      "SELECT * FROM simulations WHERE user_id=$1 ORDER BY created_at DESC",
-      [user_id]
-    );
-
-    res.json({ simulations: result.rows });
-  } catch (err) {
-    console.error("GET Simulations Error:", err.message);
-    res.status(500).json({ error: "Error fetching simulations" });
-  }
-});
-
-// ---------------- START SERVER ----------------
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`CreditNest server running on port ${PORT}`));

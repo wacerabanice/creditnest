@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import API from "../services/api";
+import API from "../services/api"; 
 
 function Simulator() {
   const [revenue, setRevenue] = useState("");
@@ -10,29 +10,22 @@ function Simulator() {
   const [result, setResult] = useState(null);
   const navigate = useNavigate();
 
-  const user_id = Number(localStorage.getItem("user_id")); // current user
+  const user_id = Number(localStorage.getItem("user_id"));
 
-  // Load last simulation on mount
+  // Load last simulation for this user
   useEffect(() => {
     if (!user_id) return;
-
-    const fetchSimulations = async () => {
-      try {
-        const { data } = await API.get(`/simulate/${user_id}`);
-        if (data.simulations && data.simulations.length > 0)
-          setResult(data.simulations[0]); // latest first
-      } catch (err) {
-        console.error("Fetch simulations error:", err);
-      }
-    };
-
-    fetchSimulations();
+    try {
+      const sims = JSON.parse(localStorage.getItem("simulatorResults")) || [];
+      if (sims.length > 0) setResult(sims[0]);
+    } catch (e) {
+      console.warn("LocalStorage corrupted:", e);
+    }
   }, [user_id]);
 
   const runSimulation = async () => {
-    if (!revenue || !expenses || !loans || !creditScore) {
+    if (!revenue || !expenses || !loans || !creditScore)
       return alert("All fields are required");
-    }
 
     if (!user_id) return alert("User not found. Please login.");
 
@@ -46,18 +39,22 @@ function Simulator() {
       });
 
       const data = response.data;
-      const gaps = Array.isArray(data.gaps) ? data.gaps : String(data.gaps).split(";").map(g => g.trim());
+      const gaps = data.simulation.gaps
+        ? Array.isArray(data.simulation.gaps)
+          ? data.simulation.gaps
+          : String(data.simulation.gaps).split(";").map(g => g.trim())
+        : [];
 
-      const simulation = {
-        ...data.simulation,
-        gaps,
-        date: new Date(data.simulation.created_at).toLocaleString()
-      };
+      const simulation = { ...data.simulation, gaps, date: new Date(data.simulation.created_at).toLocaleString() };
+
+      // Save only this user's simulations
+      let existing = JSON.parse(localStorage.getItem("simulatorResults")) || [];
+      if (!Array.isArray(existing)) existing = [];
+      existing = [simulation, ...existing.filter(s => s.user_id === user_id)];
+      localStorage.setItem("simulatorResults", JSON.stringify(existing));
 
       setResult(simulation);
-      alert("Simulation saved! Redirecting to Dashboard...");
-      navigate("/");
-
+      alert("Simulation saved!");
     } catch (err) {
       console.error("Simulation API error:", err.response?.data || err.message);
       alert(err.response?.data?.error || "Error running simulation");
@@ -69,22 +66,20 @@ function Simulator() {
       <div className="max-w-xl mx-auto bg-teal-300 p-10 rounded-2xl shadow-lg">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Loan Readiness Simulator</h2>
 
-        <input placeholder="Monthly Revenue" value={revenue} onChange={(e) => setRevenue(e.target.value)} type="number" className="border border-gray-300 p-3 w-full mb-4 rounded-lg"/>
-        <input placeholder="Monthly Expenses" value={expenses} onChange={(e) => setExpenses(e.target.value)} type="number" className="border border-gray-300 p-3 w-full mb-4 rounded-lg"/>
-        <input placeholder="Existing Loans" value={loans} onChange={(e) => setLoans(e.target.value)} type="number" className="border border-gray-300 p-3 w-full mb-4 rounded-lg"/>
-        <input placeholder="Credit Score" value={creditScore} onChange={(e) => setCreditScore(e.target.value)} type="number" className="border border-gray-300 p-3 w-full mb-6 rounded-lg"/>
+        <input type="number" placeholder="Monthly Revenue" value={revenue} onChange={e => setRevenue(e.target.value)} className="border p-3 w-full mb-4 rounded-lg" />
+        <input type="number" placeholder="Monthly Expenses" value={expenses} onChange={e => setExpenses(e.target.value)} className="border p-3 w-full mb-4 rounded-lg" />
+        <input type="number" placeholder="Existing Loans" value={loans} onChange={e => setLoans(e.target.value)} className="border p-3 w-full mb-4 rounded-lg" />
+        <input type="number" placeholder="Credit Score" value={creditScore} onChange={e => setCreditScore(e.target.value)} className="border p-3 w-full mb-6 rounded-lg" />
 
-        <button onClick={runSimulation} className="bg-gradient-to-r from-teal-600 to-teal-500 text-white w-full py-3 rounded-lg hover:scale-105 transition">
-          Run Simulation
-        </button>
+        <button onClick={runSimulation} className="bg-teal-600 text-white w-full py-3 rounded-lg">Run Simulation</button>
       </div>
 
       {result && (
-        <div className="max-w-xl space-y-4 mx-auto bg-teal-300 p-10 rounded-2xl shadow-lg">
+        <div className="max-w-xl mx-auto bg-teal-300 p-6 rounded-2xl shadow-lg">
           <h3 className="text-lg font-semibold">Latest Simulation</h3>
           <p><strong>Date:</strong> {result.date}</p>
           <p><strong>Readiness Score:</strong> {result.readiness_score}%</p>
-          <p><strong>Gaps:</strong> {result.gaps.length > 0 ? result.gaps.join(", ") : "None"}</p>
+          <p><strong>Gaps:</strong> {result.gaps.length ? result.gaps.join(", ") : "None"}</p>
         </div>
       )}
     </div>
