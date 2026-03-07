@@ -13,30 +13,21 @@ function Profile() {
 
   // Switch mode based on URL
   useEffect(() => {
-    if (location.pathname === "/login") setMode("login");
-    else setMode("signup");
+    setMode(location.pathname === "/login" ? "login" : "signup");
   }, [location.pathname]);
 
   const isValidEmail = (email) => {
-  if (!email) return false;
-  email = email.trim().toLowerCase();
-
-  // Regex explanation:
-  // ^[\w.%+-]+      => start with word chars, %, +, -, . allowed
-  // @               => must have a single @
-  // [A-Za-z0-9.-]+  => domain name (letters, numbers, dots, hyphens)
-  // \.[A-Za-z]{2,}$ => top-level domain like .com, .net, .org
-  const emailRegex = /^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-  return emailRegex.test(email);
-};
+    if (!email) return false;
+    email = email.trim().toLowerCase();
+    const emailRegex = /^[\w.%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    return emailRegex.test(email);
+  };
 
   // ----------------- SIGNUP -----------------
   const handleSignup = async (e) => {
     e.preventDefault();
     if (!name || !email || !password) return alert("All fields are required");
     if (!isValidEmail(email)) return alert("Invalid email");
-
-    console.log("Signup clicked", { name, email, password });
 
     try {
       const { data } = await API.post("/signup", {
@@ -45,10 +36,8 @@ function Profile() {
         password: password.trim(),
       });
 
-      console.log("Signup response:", data);
       alert(`Welcome ${data.user.name}! Your account has been created.`);
-      // Redirect to login after signup
-      navigate("/login");
+      navigate("/login"); // redirect to login after signup
     } catch (err) {
       console.error("Signup API error:", err.response?.data || err.message);
       alert(err.response?.data?.error || "Signup failed");
@@ -61,19 +50,21 @@ function Profile() {
     if (!email || !password) return alert("All fields required");
     if (!isValidEmail(email)) return alert("Invalid email");
 
-    console.log("Login clicked", { email, password });
-
     try {
       const { data } = await API.post("/login", {
         email: email.trim().toLowerCase(),
         password: password.trim(),
       });
 
-      console.log("Login response:", data);
       alert(`Welcome back, ${data.name}!`);
-      localStorage.setItem("user_id", data.id); // store user id
-      // Redirect to dashboard/home after login
-      navigate("/");
+      
+      // Store current user_id
+      localStorage.setItem("user_id", data.id);
+
+      // Optional: reset the result state in Simulator by removing previous simulations for this user
+      // We don't delete all simulations; we just filter them in Simulator
+
+      navigate("/"); // redirect to dashboard
     } catch (err) {
       console.error("Login API error:", err.response?.data || err.message);
       alert(err.response?.data?.error || "Login failed");
@@ -86,64 +77,34 @@ function Profile() {
         <button
           className={`px-4 py-2 rounded-xl ${mode === "signup" ? "bg-teal-600 text-white" : "bg-teal-100"}`}
           onClick={() => navigate("/signup")}
-        >
-          Sign Up
-        </button>
+        >Sign Up</button>
         <button
           className={`px-4 py-2 rounded-xl ${mode === "login" ? "bg-teal-600 text-white" : "bg-teal-100"}`}
           onClick={() => navigate("/login")}
-        >
-          Login
-        </button>
+        >Login</button>
       </div>
 
       {mode === "signup" ? (
         <div className="space-y-4">
-          <input
-            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="w-full bg-white p-4 placeholder-green-900 rounded-2xl shadow-lg"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button
-            className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold p-3 rounded-xl transition"
-            onClick={handleSignup}
-          >
+          <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)}
+            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg" />
+          <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
+            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg" />
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
+            className="w-full bg-white p-4 placeholder-green-900 rounded-2xl shadow-lg" />
+          <button onClick={handleSignup}
+            className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold p-3 rounded-xl transition">
             Create Profile
           </button>
         </div>
       ) : (
         <div className="space-y-4">
-          <input
-            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button
-            className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold p-3 rounded-xl transition"
-            onClick={handleLogin}
-          >
+          <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
+            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg" />
+          <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
+            className="w-full bg-white placeholder-green-900 p-4 rounded-2xl shadow-lg" />
+          <button onClick={handleLogin}
+            className="w-full bg-teal-600 hover:bg-teal-500 text-white font-semibold p-3 rounded-xl transition">
             Login
           </button>
         </div>

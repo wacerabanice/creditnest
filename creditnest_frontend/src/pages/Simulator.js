@@ -10,33 +10,26 @@ function Simulator() {
   const [result, setResult] = useState(null);
   const navigate = useNavigate();
 
-  // Load last simulation on mount
+  const user_id = Number(localStorage.getItem("user_id"));
+  if (!user_id) navigate("/login");
+
+  // Load last simulation for current user only
   useEffect(() => {
     try {
-      const sims = JSON.parse(localStorage.getItem("simulatorResults")) || [];
+      let sims = JSON.parse(localStorage.getItem("simulatorResults")) || [];
+      sims = sims.filter(s => s.user_id === user_id); // filter by current user
       if (sims.length > 0) setResult(sims[0]); // latest first
     } catch (e) {
       console.warn("LocalStorage corrupted:", e);
     }
-  }, []);
+  }, [user_id]);
 
   const runSimulation = async () => {
     if (!revenue || !expenses || !loans || !creditScore) {
       return alert("All fields are required");
     }
 
-    const user_id = Number(localStorage.getItem("user_id"));
-    if (!user_id) return alert("User not found. Please login.");
-
     try {
-      console.log("Sending simulation request", {
-        user_id,
-        monthly_revenue: Number(revenue),
-        monthly_expenses: Number(expenses),
-        existing_loans: Number(loans),
-        credit_score: Number(creditScore),
-      });
-
       const response = await API.post("/simulate", {
         user_id,
         monthly_revenue: Number(revenue),
@@ -47,7 +40,6 @@ function Simulator() {
 
       const data = response.data;
 
-      // Normalize gaps to array
       let gaps = [];
       if (data.simulation.gaps) {
         gaps = Array.isArray(data.simulation.gaps)
@@ -67,20 +59,14 @@ function Simulator() {
         date: new Date(data.simulation.date).toLocaleString(),
       };
 
-      // Save simulation safely to localStorage
-      try {
-        let existing = JSON.parse(localStorage.getItem("simulatorResults")) || [];
-        if (!Array.isArray(existing)) existing = [];
-        localStorage.setItem("simulatorResults", JSON.stringify([simulation, ...existing]));
-      } catch (e) {
-        console.warn("LocalStorage corrupted:", e);
-        localStorage.setItem("simulatorResults", JSON.stringify([simulation]));
-      }
+      // Save simulation for this user
+      let existing = JSON.parse(localStorage.getItem("simulatorResults")) || [];
+      if (!Array.isArray(existing)) existing = [];
+      localStorage.setItem("simulatorResults", JSON.stringify([simulation, ...existing]));
 
       setResult(simulation);
       alert("Simulation saved! Redirecting to Dashboard...");
       navigate("/");
-
     } catch (err) {
       console.error("Simulation API error:", err.response?.data || err.message);
       alert(err.response?.data?.error || "Error running simulation");
@@ -92,39 +78,17 @@ function Simulator() {
       <div className="max-w-xl mx-auto bg-teal-300 p-10 rounded-2xl shadow-lg">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Loan Readiness Simulator</h2>
 
-        <input
-          className="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          placeholder="Monthly Revenue"
-          value={revenue}
-          onChange={(e) => setRevenue(e.target.value)}
-          type="number"
-        />
-        <input
-          className="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          placeholder="Monthly Expenses"
-          value={expenses}
-          onChange={(e) => setExpenses(e.target.value)}
-          type="number"
-        />
-        <input
-          className="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          placeholder="Existing Loans"
-          value={loans}
-          onChange={(e) => setLoans(e.target.value)}
-          type="number"
-        />
-        <input
-          className="border border-gray-300 p-3 w-full mb-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          placeholder="Credit Score"
-          value={creditScore}
-          onChange={(e) => setCreditScore(e.target.value)}
-          type="number"
-        />
+        <input type="number" placeholder="Monthly Revenue" value={revenue} onChange={e => setRevenue(e.target.value)}
+          className="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+        <input type="number" placeholder="Monthly Expenses" value={expenses} onChange={e => setExpenses(e.target.value)}
+          className="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+        <input type="number" placeholder="Existing Loans" value={loans} onChange={e => setLoans(e.target.value)}
+          className="border border-gray-300 p-3 w-full mb-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
+        <input type="number" placeholder="Credit Score" value={creditScore} onChange={e => setCreditScore(e.target.value)}
+          className="border border-gray-300 p-3 w-full mb-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" />
 
-        <button
-          onClick={runSimulation}
-          className="bg-gradient-to-r from-teal-600 to-teal-500 text-white w-full py-3 rounded-lg hover:scale-105 transition"
-        >
+        <button onClick={runSimulation}
+          className="bg-gradient-to-r from-teal-600 to-teal-500 text-white w-full py-3 rounded-lg hover:scale-105 transition">
           Run Simulation
         </button>
       </div>
