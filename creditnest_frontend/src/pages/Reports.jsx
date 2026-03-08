@@ -19,12 +19,16 @@ function Reports() {
 
   // Summary stats
   const totalSimulations = simulations.length;
-  const averageReadiness = totalSimulations
-    ? Math.round(
-        simulations.reduce((sum, sim) => sum + sim.readiness_score, 0) /
-          totalSimulations
-      )
-    : 0;
+  const user_id = Number(localStorage.getItem("user_id"));
+  const userSimulations = simulations.filter(sim => sim.user_id === user_id);
+
+const averageReadiness = totalSimulations
+  ? Math.round(
+      userSimulations.reduce((sum, sim) => sum + Number(sim.readiness_score || 0), 0) /
+        totalSimulations
+    )
+  : 0;
+
   const latestGaps =
     simulations.length > 0
       ? simulations[0].gaps.length > 0
