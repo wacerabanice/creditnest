@@ -9,6 +9,7 @@ function LoanScore() {
   const [breakdown, setBreakdown] = useState({}); // for mini category scores
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [status, setStatus] = useState(null);
 
   useEffect(() => {
     const fetchScore = async () => {
@@ -75,6 +76,7 @@ function LoanScore() {
         <div>
           <p className={`text-4xl font-bold ${getColor(score)}`}>{score ?? "--"}</p>
           <p className="text-gray-500 mt-1">{getMessage(score)} loan readiness</p>
+          <p>Status: {status}</p>
         </div>
 
         {/* Score Circle */}

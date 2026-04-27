@@ -15,7 +15,8 @@ function Cashflow() {
 
   const dscr = loan_payments ? (net_cashflow / loan_payments).toFixed(2) : 0;
  
-  
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
 
   useEffect(() => {
@@ -24,7 +25,7 @@ function Cashflow() {
         const res = await API.get(`/cashflow`);
       if (res.data) setForm(res.data);
       }  catch (err) {
-        console.error("Fetch Cashflow profile error:", err);
+        error("Fetch Cashflow profile error:", err);
         setError("Failed to load Cashflow profile");
       } finally {
         setLoading(false);
@@ -33,6 +34,7 @@ function Cashflow() {
     fetchCashflowData();
   }, []);
 
+  
 
 
   const handleSubmit = async (e) => {
@@ -50,6 +52,7 @@ function Cashflow() {
     }
   };
 
+   <p>{loading ? "Loading..." : "Done"}</p>
 
   return (
     <div className="max-w-xl mx-auto p-8 bg-white rounded shadow mt-8">

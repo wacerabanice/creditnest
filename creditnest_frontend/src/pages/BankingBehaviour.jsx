@@ -12,6 +12,9 @@ function BankingBehaviour() {
     cheque_returns: ""
   });
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
    useEffect(() => {
     const fetchBankingData = async () => {
       setLoading(true);
@@ -26,7 +29,7 @@ function BankingBehaviour() {
     });
     }
       } catch (err) {
-        console.error("Fetch Banking Behaviour profile error:", err);
+        error("Fetch Banking Behaviour profile error:", err);
         setError("Failed to load Banking Behaviour profile");
       } finally {
         setLoading(false);
@@ -53,6 +56,8 @@ function BankingBehaviour() {
       setLoading(false);
     }
   };
+
+   <p>{loading ? "Loading..." : "Done"}</p>
 
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center items-start pt-16">

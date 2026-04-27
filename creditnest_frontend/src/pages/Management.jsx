@@ -4,7 +4,8 @@ import API from "../services/api";
 
 function Management() {
   const navigate = useNavigate();
-
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     experience: "",
@@ -13,6 +14,7 @@ function Management() {
     succession: ""
   });
 
+  
   // Fetch existing profile on mount
   useEffect(() => {
     const fetchMgtProfile = async () => {
@@ -21,7 +23,7 @@ function Management() {
         const res = await API.get("/management");
         if (res.data) setForm(res.data);
       } catch (err) {
-        console.error("Fetch Management profile error:", err);
+        error("Fetch Management profile error:", err);
         setError("Failed to load Management profile");
       } finally {
         setLoading(false);
@@ -49,6 +51,8 @@ function Management() {
     }
   };
   
+  <p>{loading ? "Loading..." : "Done"}</p>
+
   return (
     <div className="max-w-xl mx-auto p-8 bg-white rounded shadow mt-8">
       <h2 className="text-2xl font-bold mb-4">Management & Ownership</h2>

@@ -11,7 +11,8 @@ function CreditHistory() {
     days_past_due: ""
   });
 
- 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchCreditData = async () => {
@@ -19,7 +20,7 @@ function CreditHistory() {
         const res = await API.get(`/credit-history`);
         if (res.data) setForm(res.data);
       }  catch (err) {
-        console.error("Fetch Credit  profile error:", err);
+        error("Fetch Credit  profile error:", err);
         setError("Failed to load Credit profile");
       } finally {
         setLoading(false);
@@ -47,6 +48,8 @@ function CreditHistory() {
       setLoading(false);
     }
   };
+
+   <p>{loading ? "Loading..." : "Done"}</p>
 
 
   return (

@@ -11,7 +11,8 @@ function FinancialHealth() {
     profitMargin: ""
   });
 
- 
+ const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchFinancialProfile = async () => {
@@ -20,7 +21,7 @@ function FinancialHealth() {
         const res = await API.get("/financial-health");
         if (res.data) setForm(res.data);
       } catch (err) {
-        console.error("Fetch Financial profile error:", err);
+        error("Fetch Financial profile error:", err);
         setError("Failed to load Financial profile");
       } finally {
         setLoading(false);
@@ -47,6 +48,8 @@ function FinancialHealth() {
       setLoading(false);
     }
   };
+
+   <p>{loading ? "Loading..." : "Done"}</p>
 
   return (
         <div className="max-w-xl mx-auto p-8 bg-white rounded shadow mt-8">
