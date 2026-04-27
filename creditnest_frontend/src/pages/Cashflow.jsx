@@ -15,8 +15,7 @@ function Cashflow() {
 
   const dscr = loan_payments ? (net_cashflow / loan_payments).toFixed(2) : 0;
  
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  
 
 
   useEffect(() => {
@@ -34,9 +33,7 @@ function Cashflow() {
     fetchCashflowData();
   }, []);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

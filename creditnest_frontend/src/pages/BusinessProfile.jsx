@@ -5,10 +5,6 @@ import API from "../services/api";
 function BusinessProfile() {
   const navigate = useNavigate();
 
-  const userId = localStorage.getItem("user_id"); // get user_id from localStorage
-  const token = localStorage.getItem("token"); // optional if needed for logging/debug
-
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({

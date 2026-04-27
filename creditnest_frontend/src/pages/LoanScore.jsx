@@ -5,7 +5,6 @@ import axios from "axios";
 
 function LoanScore() {
   const [score, setScore] = useState(null);
-  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [breakdown, setBreakdown] = useState({}); // for mini category scores
   const [error, setError] = useState("");

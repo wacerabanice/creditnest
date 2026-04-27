@@ -11,8 +11,7 @@ function CreditHistory() {
     days_past_due: ""
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+ 
 
   useEffect(() => {
     const fetchCreditData = async () => {
