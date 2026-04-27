@@ -1,14 +1,13 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://creditnest.onrender.com", // deployed backend
-  headers: { "Content-Type": "application/json" },
+  baseURL: "http://localhost:5000/api", // backend baseURL
 });
 
-// Optional: log every request (debugging)
 API.interceptors.request.use(
   (config) => {
-    console.log("Sending request:", config.method, config.url, config.data);
+    const token = localStorage.getItem("token");
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   (error) => Promise.reject(error)

@@ -1,56 +1,152 @@
 import { Link } from "react-router-dom";
-import React, { useState, useEffect } from "react";
 
 function Home() {
-  const user_id = localStorage.getItem("user_id");
-  const [username, setUsername] = useState("");
+  return (
+    <div className="min-h-screen bg-gray-100">
 
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user")); 
-    if (user) setUsername(user.name); 
-  }, [])
+      {/* Hero Section */}
 
-  if (!user_id) {
-    return (
-      <div className="p-10 text-center">
-        <h1 className="text-3xl font-bold">Welcome to CreditNest</h1>
-        <br />
-        <p>CreditNest is designed to help individuals understand and improve their 
-          financial readiness for loans.</p> 
-        <p>It provides a simple and interactive environment where users can simulate their 
-          financial situation by entering details such as monthly income, expenses, and existing obligations.</p><br />
-        <p>Based on this information, CreditNest generates a readiness score and insights that 
-          help users understand how prepared they are to apply for credit.</p>
+      <div className="text-center py-20 bg-white shadow">
 
+        <h1 className="text-5xl font-bold text-teal-600">
+          CreditNest
+        </h1>
 
-        <div className="mt-6 flex justify-center gap-6">
-          <Link to="/register" className="bg-teal-600 text-white px-4 py-2 rounded">
-            Register
+        <p className="mt-4 text-xl text-gray-700">
+          Know if your business is loan ready before applying.
+        </p>
+
+        <p className="mt-2 text-gray-500">
+          Analyze your financial health, credit profile, and banking behavior.
+        </p>
+
+        <div className="mt-8 flex justify-center gap-6">
+
+          <Link
+            to="/register"
+            className="bg-teal-400 px-6 py-3 rounded-lg shadow"
+          >
+            Get Started
           </Link>
 
-          <Link to="/login" className="bg-green-600 text-white px-4 py-2 rounded">
-            Log In
+          <Link
+            to="/login"
+            className="bg-teal-600 text-white  px-6 py-3 rounded-lg shadow"
+          >
+            Sign In
           </Link>
+
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="p-10">
-      <h1 className="text-2xl font-bold">Welcome, {username}</h1><br />
-      <p>Access The Simulator and Summarized Reports from your simulations:</p>
-      <div className="grid grid-cols-2 gap-6 mt-8">
+      {/* How it Works */}
 
-        <Link to="/simulator" className="bg-teal-500 p-6 rounded text-white">
-          Loan Simulator
-        </Link>
+      <div className="max-w-6xl mx-auto mt-20 grid md:grid-cols-3 gap-10 px-6">
+        
+        <div className="bg-white p-6 rounded shadow">
 
-        <Link to="/reports" className="bg-cyan-600 p-6 rounded text-white">
-          Reports
-        </Link>
+          <h3 className="text-xl font-bold text-teal-600">
+            1. Enter Business Data
+          </h3>
+
+          <p className="mt-3 text-gray-600">
+            Provide details about your business profile, financial health,
+            banking behavior and credit history.
+          </p>
+
+        </div>
+
+        <div className="bg-white p-6 rounded shadow">
+
+          <h3 className="text-xl font-bold text-teal-600">
+            2. Run Loan Readiness Assessment
+          </h3>
+
+          <p className="mt-3 text-gray-600">
+            Our scoring engine evaluates your business across
+            7 key credit factors used by lenders.
+          </p>
+
+        </div>
+
+        <div className="bg-white p-6 rounded shadow">
+
+          <h3 className="text-xl font-bold text-teal-600">
+            3. Get Your Score
+          </h3>
+
+          <p className="mt-3 text-gray-600">
+            Receive your loan readiness score, risk profile,
+            and recommendations to improve financing eligibility.
+          </p>
+
+        </div>
 
       </div>
+
+      {/* Feature Section */}
+
+      <div className="max-w-6xl mx-auto mt-24 px-6">
+
+        <h2 className="text-3xl font-bold text-center text-gray-800">
+          Why Use CreditNest?
+        </h2>
+
+        <div className="grid md:grid-cols-4 gap-8 mt-10">
+
+          <div className="bg-white p-6 rounded shadow text-center">
+            <h4 className="font-bold text-lg">Loan Readiness Score</h4>
+            <p className="text-gray-600 mt-2">
+              Understand how banks evaluate your business.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded shadow text-center">
+            <h4 className="font-bold text-lg">Financial Insights</h4>
+            <p className="text-gray-600 mt-2">
+              Identify weaknesses in your financial profile.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded shadow text-center">
+            <h4 className="font-bold text-lg">Loan Eligibility</h4>
+            <p className="text-gray-600 mt-2">
+              Estimate the maximum loan your business qualifies for.
+            </p>
+          </div>
+
+          <div className="bg-white p-6 rounded shadow text-center">
+            <h4 className="font-bold text-lg">Actionable Advice</h4>
+            <p className="text-gray-600 mt-2">
+              Get recommendations to improve your loan chances.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Call to Action */}
+
+      <div className="text-center mt-24 mb-20">
+
+        <h2 className="text-3xl font-bold text-gray-800">
+          Start Assessing Your Business Today
+        </h2>
+
+        <div className="mt-6">
+
+          <Link
+            to="/signup"
+            className="bg-teal-600 text-white px-8 py-3 rounded-lg shadow"
+          >
+            Create Free Account
+          </Link>
+
+        </div>
+
+      </div>
+
     </div>
   );
 }

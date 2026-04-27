@@ -2,26 +2,36 @@ import React from "react";
 
 function Education() {
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Education</h1>
-      <p className="text-gray-700 mb-4">
-        Access educational content to improve your credit readiness and financial knowledge.
-      </p>
+    <div className="max-w-4xl mx-auto p-8 space-y-8">
 
-      <div className="bg-white p-6 rounded-2xl shadow-md space-y-4">
-        <div className="p-4 border rounded-lg hover:bg-teal-50 transition">
-          <h2 className="font-semibold text-lg">Lesson 1: Understanding Credit Scores</h2>
-          <p className="text-gray-600 text-sm">Learn what affects your credit score and how to improve it.</p>
-        </div>
-        <div className="p-4 border rounded-lg hover:bg-teal-50 transition">
-          <h2 className="font-semibold text-lg">Lesson 2: Loan Readiness Tips</h2>
-          <p className="text-gray-600 text-sm">Practical steps to prepare for loan applications.</p>
-        </div>
-        <div className="p-4 border rounded-lg hover:bg-teal-50 transition">
-          <h2 className="font-semibold text-lg">Lesson 3: Simulator Guide</h2>
-          <p className="text-gray-600 text-sm">How to run simulations and interpret results effectively.</p>
-        </div>
-      </div>
+      <h1 className="text-4xl font-bold text-gray-800 text-center mb-6">
+        Credit Education
+      </h1>
+
+      <article className="p-6 bg-white rounded-2xl shadow-md border border-gray-100">
+        <h3 className="text-2xl font-semibold text-teal-600 mb-3">
+          How Banks Assess SMEs
+        </h3>
+        <p className="text-gray-700 leading-relaxed">
+          Banks review financial health, cashflow stability, management capability, 
+          and collateral strength before approving loans. Understanding these factors 
+          helps SMEs prepare and increase their chances of loan approval.
+        </p>
+      </article>
+
+      <article className="p-6 bg-white rounded-2xl shadow-md border border-gray-100">
+        <h3 className="text-2xl font-semibold text-teal-600 mb-3">
+          How to Improve Loan Readiness
+        </h3>
+        <ul className="list-disc list-inside text-gray-700 space-y-2">
+          <li>Maintain proper books and records</li>
+          <li>Improve bank deposits and cash reserves</li>
+          <li>Reduce outstanding debt</li>
+          <li>Maintain a strong DSCR and cashflow stability</li>
+          <li>Ensure management and ownership practices are sound</li>
+        </ul>
+      </article>
+
     </div>
   );
 }

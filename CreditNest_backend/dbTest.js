@@ -17,3 +17,27 @@ pool.connect()
   .catch(err => console.error("❌ DB Connection Error:", err));
 
 module.exports = pool;
+
+const pool = require("./db"); // make sure this points to your db.js
+
+async function checkDatabase() {
+  try {
+    // Show current database
+    const dbNameRes = await pool.query("SELECT current_database();");
+    console.log("✅ Connected to database:", dbNameRes.rows[0].current_database);
+
+    // List all tables in public schema
+    const tablesRes = await pool.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema='public';
+    `);
+    console.log("📋 Tables in this DB:", tablesRes.rows.map(t => t.table_name));
+  } catch (err) {
+    console.error("DB check error:", err);
+  } finally {
+    pool.end();
+  }
+}
+
+checkDatabase();

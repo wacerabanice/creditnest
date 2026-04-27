@@ -3,80 +3,114 @@ import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 
 function Register() {
-  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const isValidEmail = (email) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const navigate = useNavigate();
 
-  const handleRegister = async () => {
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError("");
+
     if (!name || !email || !password) {
-      alert("Please fill in all fields");
-      return;
-    }
-
-    if (!isValidEmail(email)) {
-      alert("Please enter a valid email address");
+      setError("All fields are required");
       return;
     }
 
     try {
-      const res = await API.post("/signup", {
-        name: name.trim(),
-        email: email.toLowerCase(),
-        password: password.trim(),
-      });
-
-      const user = res.data.user;
-
-      // Store user ID only, not password
-      localStorage.setItem("user_id", user.id);
-      localStorage.setItem("user", JSON.stringify({ name: user.name, email: user.email }));
-
-      alert(`Welcome, ${user.name}! Account created successfully.`);
-      navigate("/login"); // redirect to login after signup
+      setLoading(true);
+      const res = await API.post("/auth/register", { name, email, password });
+      alert(res.data.message);
+      navigate("/login"); // redirect to login after successful registration
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.error || "Registration failed");
+      console.error("Register error:", err.response || err);
+      setError(err.response?.data?.error || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="m-3 p-10 max-w-md mx-auto bg-green-200 shadow rounded-2xl">
-      <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-800 to-teal-400">
+      <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">CreditNest</h1>
+          <p className="text-gray-500 text-sm">Smart Credit Intelligence</p>
+        </div>
 
-      <input
-        type="text"
-        placeholder="User Name"
-        className="border p-3 w-full mb-4 rounded-lg"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+        <h2 className="text-xl font-semibold text-gray-700 mb-4 text-center">
+          Create your account
+        </h2>
 
-      <input
-        type="email"
-        placeholder="Email Address"
-        className="border p-3 w-full mb-4 rounded-lg"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        {error && (
+          <div className="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm">
+            {error}
+          </div>
+        )}
 
-      <input
-        type="password"
-        placeholder="Password"
-        className="border p-3 w-full mb-6 rounded-lg"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <form onSubmit={handleRegister}>
+          <div className="mb-4">
+            <label className="text-sm text-gray-600">Full Name</label>
+            <input
+              type="text"
+              placeholder="John Doe"
+              className="border border-gray-300 p-3 w-full mt-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-      <button
-        onClick={handleRegister}
-        className="bg-teal-600 text-white w-full py-3 rounded-lg hover:bg-teal-500"
-      >
-        Register
-      </button>
+          <div className="mb-4">
+            <label className="text-sm text-gray-600">Email Address</label>
+            <input
+              type="email"
+              placeholder="you@email.com"
+              className="border border-gray-300 p-3 w-full mt-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="mb-6 relative">
+            <label className="text-sm text-gray-600">Password</label>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              className="border border-gray-300 p-3 w-full mt-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <span
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-10 text-sm text-gray-500 cursor-pointer"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </span>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-gradient-to-r from-teal-600 to-teal-500 text-white w-full py-3 rounded-lg font-semibold hover:scale-105 transition"
+          >
+            {loading ? "Registering..." : "Register"}
+          </button>
+        </form>
+
+        <div className="text-center mt-6 text-sm text-gray-500">
+          Already have an account?{" "}
+          <span
+            onClick={() => navigate("/login")}
+            className="text-teal-600 font-medium cursor-pointer"
+          >
+            Login
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
