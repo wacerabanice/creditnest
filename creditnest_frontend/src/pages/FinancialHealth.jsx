@@ -49,11 +49,23 @@ function FinancialHealth() {
     }
   };
 
-   <p>{loading ? "Loading..." : "Done"}</p>
-   {error && <p style={{ color: "red" }}>{error}</p>}
+   
 
   return (
         <div className="max-w-xl mx-auto p-8 bg-white rounded shadow mt-8">
+          {/* 🔥 LOADING STATE */}
+        {loading && (
+          <p className="text-blue-600 mb-4">
+            Loading...
+          </p>
+        )}
+
+        {/* ❌ ERROR STATE */}
+        {error && (
+          <p className="text-red-600 mb-4">
+            {error}
+          </p>
+        )}
       <h2 className="text-2xl font-bold mb-4">Financial Health Check</h2>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <input name="revenue" placeholder="Monthly Revenue" value={form.revenue} onChange={handleChange} className="w-full p-3 border rounded" />

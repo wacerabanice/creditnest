@@ -52,11 +52,23 @@ function Cashflow() {
     }
   };
 
-   <p>{loading ? "Loading..." : "Done"}</p>
-   {error && <p style={{ color: "red" }}>{error}</p>}
+
 
   return (
     <div className="max-w-xl mx-auto p-8 bg-white rounded shadow mt-8">
+       {/* 🔥 LOADING STATE */}
+        {loading && (
+          <p className="text-blue-600 mb-4">
+            Loading...
+          </p>
+        )}
+
+        {/* ❌ ERROR STATE */}
+        {error && (
+          <p className="text-red-600 mb-4">
+            {error}
+          </p>
+        )}
       <h2 className="text-2xl font-bold mb-4">Cashflow</h2>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <input type="number" placeholder="Net Operating Cashflow" value={form.net_cashflow} onChange={(e)=>setIncome(Number(e.target.value))} className="w-full p-3 border rounded" />
