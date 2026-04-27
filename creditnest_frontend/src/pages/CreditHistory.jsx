@@ -20,7 +20,7 @@ function CreditHistory() {
         const res = await API.get(`/credit-history`);
         if (res.data) setForm(res.data);
       }  catch (err) {
-        error("Fetch Credit  profile error:", err);
+        console.error("Fetch Credit  profile error:", err);
         setError("Failed to load Credit profile");
       } finally {
         setLoading(false);
@@ -50,6 +50,7 @@ function CreditHistory() {
   };
 
    <p>{loading ? "Loading..." : "Done"}</p>
+   {error && <p style={{ color: "red" }}>{error}</p>}
 
 
   return (

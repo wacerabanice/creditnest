@@ -21,7 +21,7 @@ function FinancialHealth() {
         const res = await API.get("/financial-health");
         if (res.data) setForm(res.data);
       } catch (err) {
-        error("Fetch Financial profile error:", err);
+        console.error("Fetch Financial profile error:", err);
         setError("Failed to load Financial profile");
       } finally {
         setLoading(false);
@@ -50,6 +50,7 @@ function FinancialHealth() {
   };
 
    <p>{loading ? "Loading..." : "Done"}</p>
+   {error && <p style={{ color: "red" }}>{error}</p>}
 
   return (
         <div className="max-w-xl mx-auto p-8 bg-white rounded shadow mt-8">

@@ -29,7 +29,7 @@ function BankingBehaviour() {
     });
     }
       } catch (err) {
-        error("Fetch Banking Behaviour profile error:", err);
+        console.error("Fetch Banking Behaviour profile error:", err);
         setError("Failed to load Banking Behaviour profile");
       } finally {
         setLoading(false);
@@ -58,6 +58,7 @@ function BankingBehaviour() {
   };
 
    <p>{loading ? "Loading..." : "Done"}</p>
+   {error && <p style={{ color: "red" }}>{error}</p>}
 
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center items-start pt-16">

@@ -23,7 +23,7 @@ function Management() {
         const res = await API.get("/management");
         if (res.data) setForm(res.data);
       } catch (err) {
-        error("Fetch Management profile error:", err);
+        console.error("Fetch Management profile error:", err);
         setError("Failed to load Management profile");
       } finally {
         setLoading(false);
@@ -52,6 +52,7 @@ function Management() {
   };
   
   <p>{loading ? "Loading..." : "Done"}</p>
+  {error && <p style={{ color: "red" }}>{error}</p>}
 
   return (
     <div className="max-w-xl mx-auto p-8 bg-white rounded shadow mt-8">
